@@ -1,23 +1,9 @@
 using Microsoft.Data.SqlClient;
 public class Metodos
 {
-    
-    public static int MainMenu()
+    public Metodos(string conexion)
     {
-        int Answer = 0;
-        Printer.TituloMenuPrincipal(40);
-        Console.WriteLine("1- Mostrar Registros");
-        Console.WriteLine("2- Insertar Registro");
-        Console.WriteLine("3- Eliminar Registro");
-        Console.WriteLine("4- Salir"+"\n");
-        Answer = Int32.Parse(Console.ReadLine());
-
-        return Answer;
-    }
-
-    public static void ShowRecords(string conexion)
-    {
-        string consultaSql = "SELECT * FROM Registro";
+        string consultaSql = "SELECT * FROM REGISTRO";
 
         using (SqlConnection connection = new SqlConnection(conexion))
         {
@@ -27,49 +13,48 @@ public class Metodos
             {
                 using (SqlDataReader lector = command.ExecuteReader())
                 {
-                    if (!Listas.registros.Any())
+                    while (lector.Read())
                     {
-                        while (lector.Read())
-                        {
-                            Registro registro = new Registro();
+                        Registro registro = new Registro();
 
-                            registro.codigoproducto = lector.GetString(0);
-                            registro.descripcion = lector.GetString(1);
-                            registro.existencia = lector.GetInt32(2);
-                            registro.salida = lector.GetInt32(3);
-                            registro.stock = lector.GetInt32(4);
+                        registro.codigoproducto = lector.GetString(0);
+                        registro.descripcion = lector.GetString(1);
+                        registro.existencia = lector.GetInt32(2);
+                        registro.salida = lector.GetInt32(3);
+                        registro.stock = lector.GetInt32(4);
 
-                            Listas.registros.Add(registro);
-                        }
-                    }
-                    else
-                    {
-                        while (lector.Read())
-                        {
-                            Registro registro = new Registro();
-
-                            registro.codigoproducto = lector.GetString(0);
-                            registro.descripcion = lector.GetString(1);
-                            registro.existencia = lector.GetInt32(2);
-                            registro.salida = lector.GetInt32(3);
-                            registro.stock = lector.GetInt32(4);
-                        }
+                        Listas.registros.Add(registro);
                     }
                 }
             }
             connection.Close();
         }
-        Printer.TituloInventario(42);
-        Console.WriteLine("{0,0}{1,10}{2,30}{3,15}{4,15}{5,15}\n","Id","Codigo", "Descripcion", "Existencia", "Salidas", "Stock");
+    }
 
+    public static int MainMenu()
+    {
+        int Answer = 0;
+        Printer.TituloMenuPrincipal(40);
+        Console.WriteLine("1- Mostrar Registros");
+        Console.WriteLine("2- Insertar Registro");
+        Console.WriteLine("3- Eliminar Registro");
+        Console.WriteLine("4- Salir" + "\n");
+        Answer = Int32.Parse(Console.ReadLine());
+
+        return Answer;
+    }
+
+    public static void ShowRecords(string conexion)
+    {
+        Printer.TituloInventario(42);
         int contador = 1;
-        foreach(var i in Listas.registros)
+        Console.WriteLine("{0,0}{1,10}{2,30}{3,15}{4,15}{5,15}\n", "Id", "Codigo", "Descripcion", "Existencia", "Salidas", "Stock");
+        foreach (var i in Listas.registros)
         {
-            Console.WriteLine("{0,0}{1,10}{2,30}{3,15}{4,15}{5,15}",contador,i.codigoproducto, i.descripcion, i.existencia, i.salida, i.stock);
-            contador ++;
+            Console.WriteLine("{0,0}{1,10}{2,30}{3,15}{4,15}{5,15}", contador, i.codigoproducto, i.descripcion, i.existencia, i.salida, i.stock);
+            contador++;
         }
-       // Listas.registros.ForEach(p => Console.WriteLine("{0,0}{1,30}{2,20}{3,20}{4,20}", p.codigoproducto, p.descripcion, p.existencia, p.salida, p.stock));
-        Printer.Linea(97);
+        Printer.Linea(100);
         Thread.Sleep(5000);
     }
 
@@ -110,12 +95,49 @@ public class Metodos
             }
             connection.Close();
         }
+        Thread.Sleep(2000);
     }
 
-    public static void RemoveRecord()
+    public static void RemoveRecord(string connectionString)
     {
-        Listas.registros.ForEach(p=> Console.WriteLine(p));
-        Thread.Sleep(3000);
+        int contador = 1;
+        string idRemove = "";
+
+        string QueryDeleteId = "DELETE FROM REGISTRO WHERE CodigoProducto = @idRemove";
+
+        Printer.TituloInventario(42);
+        Console.WriteLine("{0,0}{1,10}{2,30}{3,15}{4,15}{5,15}\n", "Id", "Codigo", "Descripcion", "Existencia", "Salidas", "Stock");
+        foreach (var i in Listas.registros)
+        {
+            Console.WriteLine("{0,0}{1,10}{2,30}{3,15}{4,15}{5,15}", contador, i.codigoproducto, i.descripcion, i.existencia, i.salida, i.stock);
+            contador++;
+        }
+        Printer.Linea(97);
+        Console.WriteLine("Ingrese el código del producto a eliminar ");
+        idRemove = Console.ReadLine();
+
+        using (SqlConnection connection = new SqlConnection(connectionString))
+        {
+            connection.Open();
+
+            using (SqlCommand command = new SqlCommand(QueryDeleteId, connection))
+            {
+                command.Parameters.AddWithValue("@idRemove", idRemove);
+
+                int rowsAffected = command.ExecuteNonQuery();
+                Registro registro = Listas.registros.Find(p => p.codigoproducto == idRemove);
+                Listas.registros.Remove(registro);
+
+                if (rowsAffected > 0)
+                {
+                    Console.WriteLine("Registro eliminado con éxito.");
+                }
+                else
+                {
+                    Console.WriteLine("No se encontró ningún registro con el ID especificado.");
+                }
+            }
+        }
     }
 
 }

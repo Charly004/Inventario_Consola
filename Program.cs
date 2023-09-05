@@ -10,11 +10,13 @@ namespace MyApp // Note: actual namespace depends on the project name.
         static void Main(string[] args)
         {
             string connectionString = "Data Source=LAPTOP-59IDB8MH;Initial Catalog=Inventario;Integrated Security=True; Trust Server Certificate=true";
+            Metodos metodos = new Metodos(connectionString);
 
             int MenuSelected = 0;
             do
             {
                 MenuSelected = Metodos.MainMenu();
+
                 if ((Menu)MenuSelected == (Menu.READ))
                 {
                     Metodos.ShowRecords(connectionString);
@@ -24,9 +26,8 @@ namespace MyApp // Note: actual namespace depends on the project name.
                     Metodos.AddRecords(connectionString);
                 }else if((Menu)MenuSelected == (Menu.DELETE))
                 {
-                    Metodos.RemoveRecord();
+                    Metodos.RemoveRecord(connectionString);
                 }
-                
 
             } while (MenuSelected <= 3);
             Console.WriteLine("Gracias por su tiempo");
