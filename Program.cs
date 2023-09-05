@@ -19,17 +19,20 @@ namespace MyApp // Note: actual namespace depends on the project name.
 
                 if ((Menu)MenuSelected == (Menu.READ))
                 {
-                    Metodos.ShowRecords(connectionString);
+                    Metodos.ShowRecords();
 
                 }else if((Menu)MenuSelected == (Menu.CREATE))
                 {
-                    Metodos.AddRecords(connectionString);
+                    Metodos.AddRecords();
                 }else if((Menu)MenuSelected == (Menu.DELETE))
                 {
-                    Metodos.RemoveRecord(connectionString);
+                    Metodos.RemoveRecord();
+                }else if((Menu)MenuSelected == (Menu.UPDATE))
+                {
+                    Metodos.UpdateRecord();
                 }
 
-            } while (MenuSelected <= 3);
+            } while (MenuSelected <= 4);
             Console.WriteLine("Gracias por su tiempo");
         }
     }
@@ -39,6 +42,7 @@ namespace MyApp // Note: actual namespace depends on the project name.
         READ = 1,
         CREATE = 2,
         DELETE = 3,
-        EXIT = 4
+        UPDATE = 4,
+        EXIT = 5
     }
 }

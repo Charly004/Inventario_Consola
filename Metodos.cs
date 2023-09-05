@@ -1,8 +1,13 @@
 using Microsoft.Data.SqlClient;
+using Microsoft.Identity.Client.Extensibility;
 public class Metodos
 {
+    public static string CadenaConexion = "";
+
     public Metodos(string conexion)
     {
+        CadenaConexion = conexion;
+
         string consultaSql = "SELECT * FROM REGISTRO";
 
         using (SqlConnection connection = new SqlConnection(conexion))
@@ -38,13 +43,14 @@ public class Metodos
         Console.WriteLine("1- Mostrar Registros");
         Console.WriteLine("2- Insertar Registro");
         Console.WriteLine("3- Eliminar Registro");
-        Console.WriteLine("4- Salir" + "\n");
+        Console.WriteLine("4- Actualizar Registro");        
+        Console.WriteLine("5- Salir" + "\n");
         Answer = Int32.Parse(Console.ReadLine());
 
         return Answer;
     }
 
-    public static void ShowRecords(string conexion)
+    public static void ShowRecords()
     {
         Printer.TituloInventario(42);
         int contador = 1;
@@ -58,7 +64,7 @@ public class Metodos
         Thread.Sleep(5000);
     }
 
-    public static void AddRecords(string conexion)
+    public static void AddRecords()
     {
         Registro registro = new Registro();
         string insertSql = "insert into Registro (CodigoProducto, Descripcion, ExistenciaInicial, Salidas, Stock) values (@campo1, @campo2, @campo3, @campo4, @campo5)";
@@ -74,7 +80,7 @@ public class Metodos
         Console.WriteLine("Ingrese el stock disponible");
         registro.stock = Int32.Parse(Console.ReadLine());
 
-        using (SqlConnection connection = new SqlConnection(conexion))
+        using (SqlConnection connection = new SqlConnection(CadenaConexion))
         {
             connection.Open();
 
@@ -98,7 +104,7 @@ public class Metodos
         Thread.Sleep(2000);
     }
 
-    public static void RemoveRecord(string connectionString)
+    public static void RemoveRecord()
     {
         int contador = 1;
         string idRemove = "";
@@ -116,7 +122,7 @@ public class Metodos
         Console.WriteLine("Ingrese el código del producto a eliminar ");
         idRemove = Console.ReadLine();
 
-        using (SqlConnection connection = new SqlConnection(connectionString))
+        using (SqlConnection connection = new SqlConnection(CadenaConexion))
         {
             connection.Open();
 
@@ -131,6 +137,66 @@ public class Metodos
                 if (rowsAffected > 0)
                 {
                     Console.WriteLine("Registro eliminado con éxito.");
+                }
+                else
+                {
+                    Console.WriteLine("No se encontró ningún registro con el ID especificado.");
+                }
+            }
+        }
+    }
+
+    public static void UpdateRecord()
+    {
+        
+        int contador = 1;
+        string idUpdate = "";
+
+        string QueryUpdateId = "UPDATE REGISTRO SET Descripcion = @E_Descripcion, ExistenciaInicial = @E_ExistenciaInicial, Salidas = @E_Salidas, Stock = @E_Stock WHERE CodigoProducto = @idUpdate";
+
+        Printer.TituloInventario(42);
+        Console.WriteLine("{0,0}{1,10}{2,30}{3,15}{4,15}{5,15}\n", "Id", "Codigo", "Descripcion", "Existencia", "Salidas", "Stock");
+        foreach (var i in Listas.registros)
+        {
+            Console.WriteLine("{0,0}{1,10}{2,30}{3,15}{4,15}{5,15}", contador, i.codigoproducto, i.descripcion, i.existencia, i.salida, i.stock);
+            contador++;
+        }
+        Printer.Linea(97);
+        Console.WriteLine("Ingrese el código del producto a actualizar ");
+        idUpdate = Console.ReadLine();
+        Console.WriteLine("Ingrese la nueva descripción");
+        string E_Descripcion = Console.ReadLine();
+        Console.WriteLine("Ingrese la nueva existencia");
+        int E_ExistenciaInicial = Int32.Parse(Console.ReadLine());
+        Console.WriteLine("Ingrese la nueva salida");
+        int E_Salidas = Int32.Parse(Console.ReadLine());
+        Console.WriteLine("Ingrese el nuevo stock");
+        int E_Stock = Int32.Parse(Console.ReadLine());
+
+        using (SqlConnection connection = new SqlConnection(CadenaConexion))
+        {
+            connection.Open();
+
+            using (SqlCommand command = new SqlCommand(QueryUpdateId, connection))
+            {
+                command.Parameters.AddWithValue("@idUpdate", idUpdate);
+                command.Parameters.AddWithValue("@E_Descripcion", E_Descripcion);
+                command.Parameters.AddWithValue("@E_ExistenciaInicial", E_ExistenciaInicial);
+                command.Parameters.AddWithValue("@E_Salidas", E_Salidas);
+                command.Parameters.AddWithValue("@E_Stock", E_Stock);
+
+                Registro registro = Listas.registros.Find(p => p.codigoproducto == idUpdate);
+
+                registro.descripcion = E_Descripcion;
+                registro.existencia = E_ExistenciaInicial;
+                registro.salida = E_Salidas;
+                registro.stock = E_Stock; 
+
+                int rowsAffected = command.ExecuteNonQuery();
+
+                if (rowsAffected > 0)
+                {
+                    Console.WriteLine("Registro Actualizado con éxito.");
                 }
                 else
                 {
