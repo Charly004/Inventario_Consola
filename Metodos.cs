@@ -60,8 +60,8 @@ public class Metodos
             Console.WriteLine("{0,0}{1,10}{2,30}{3,15}{4,15}{5,15}", contador, i.codigoproducto, i.descripcion, i.existencia, i.salida, i.stock);
             contador++;
         }
-        Printer.Linea(100);
-        Thread.Sleep(5000);
+        Printer.Linea(97);
+        Thread.Sleep(4000);
     }
 
     public static void AddRecords()
@@ -77,8 +77,8 @@ public class Metodos
         registro.existencia = Int32.Parse(Console.ReadLine());
         Console.WriteLine("Ingrese las salidas");
         registro.salida = Int32.Parse(Console.ReadLine());
-        Console.WriteLine("Ingrese el stock disponible");
-        registro.stock = Int32.Parse(Console.ReadLine());
+        
+        registro.stock = registro.existencia - registro.salida;
 
         using (SqlConnection connection = new SqlConnection(CadenaConexion))
         {
@@ -97,7 +97,7 @@ public class Metodos
                 int filasAfectadas = command.ExecuteNonQuery();
 
                 Console.WriteLine($"Se insertaron {filasAfectadas} filas.");
-                Printer.Linea(100);
+                Printer.Linea(97);
             }
             connection.Close();
         }
@@ -144,6 +144,7 @@ public class Metodos
                 }
             }
         }
+        Thread.Sleep(2000);
     }
 
     public static void UpdateRecord()
@@ -170,8 +171,8 @@ public class Metodos
         int E_ExistenciaInicial = Int32.Parse(Console.ReadLine());
         Console.WriteLine("Ingrese la nueva salida");
         int E_Salidas = Int32.Parse(Console.ReadLine());
-        Console.WriteLine("Ingrese el nuevo stock");
-        int E_Stock = Int32.Parse(Console.ReadLine());
+
+        int E_Stock = E_ExistenciaInicial - E_Salidas;
 
         using (SqlConnection connection = new SqlConnection(CadenaConexion))
         {
@@ -204,6 +205,7 @@ public class Metodos
                 }
             }
         }
+        Thread.Sleep(3000);
     }
 
 }
